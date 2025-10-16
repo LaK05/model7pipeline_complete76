@@ -1,11 +1,9 @@
-# Pandas fallback in-memory analytics (no Spark required)
 import pandas as pd
 import os
 processed_dir = os.path.join('data', 'processed')
 try:
     df = pd.read_parquet(processed_dir)
 except Exception:
-    # fallback: read CSVs if Parquet not present
     import glob
     files = glob.glob(os.path.join(processed_dir, '*.csv'))
     if not files:
