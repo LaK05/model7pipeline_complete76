@@ -1,0 +1,49 @@
+Execution steps (Windows + Cygwin + Docker) - concise and ordered
+
+Prerequisites (Windows):
+- Install Docker Desktop and ensure it is running.
+- Install Java JDK 11 and set JAVA_HOME in Windows environment variables.
+- Install Python 3.10/3.11 and create a virtual environment.
+  Example (PowerShell):
+    python -m venv venv
+    .\venv\Scripts\activate
+    pip install -r requirements.txt
+
+Start Kafka (Docker):
+1. Open PowerShell (not Cygwin) and run:
+   cd docker
+   docker compose up -d
+2. Verify Kafka is running: docker ps
+
+Flink cluster (Cygwin required for .sh scripts on Windows):
+1. Use Cygwin terminal and change to the flink folder: ./flink/bin/start-cluster.sh
+2. Confirm JobManager is running by visiting http://localhost:8081
+
+Preprocessing (Flink):
+- In your venv (PowerShell), run:
+  python flink_jobs/preprocess_flink.py
+- If pyflink is not available or incompatible, run Spark fallback:
+  python spark_jobs/pandas_in_memory_fallback.py
+
+Train initial model (local):
+  python models/train_initial_model.py
+
+Kafka streaming (producer -> consumer inference):
+1. Start the producer in PowerShell:
+   python kafka_clients/kafka_producer.py
+2. In another terminal, start the consumer:
+   python kafka_clients/kafka_consumer_inference.py
+- The consumer will periodically save model snapshots to models/sgd_model.pkl
+
+CDC simulation (optional):
+  python kafka_clients/cdc_simulator.py
+
+In-memory analytics:
+  # If you have Spark installed:
+  spark-submit spark_jobs/spark_in_memory.py
+  # Otherwise run pandas fallback:
+  python spark_jobs/pandas_in_memory_fallback.py
+
+Notes & Troubleshooting:
+- PyFlink requires matching Java/Python versions; if unavailable, use the Spark/Pandas fallback.
+- If you encounter permission issues running Flink shell scripts, run them from Cygwin and ensure JAVA_HOME is visible to Cygwin.
