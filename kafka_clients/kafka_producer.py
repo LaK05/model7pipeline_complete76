@@ -1,22 +1,30 @@
-import json, time, os, csv
+import json, random, time, argparse
 from kafka import KafkaProducer
-producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
-                         value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-topic = 'streaming-input'
-csv_path = os.path.join('data','raw_customer_data.csv')
-with open(csv_path, 'r', encoding='utf-8') as f:
-    reader = csv.DictReader(f)
-    for i, row in enumerate(reader):
-        # Simplify and send a small JSON per row; convert empty strings to None/numeric types
-        msg = {
-            'customer_id': row.get('customer_id') or None,
-            'age': int(row['age']) if row.get('age') else None,
-            'salary': float(row['salary']) if row.get('salary') else None,
-            'num_transactions': int(row['num_transactions']) if row.get('num_transactions') else 0,
-            'region': row.get('region') or 'UNK'
+from datetime import datetime
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--broker", default="host.docker.internal:9092")
+    parser.add_argument("--topic", default="sensor-data")
+    args = parser.parse_args()
+
+    producer = KafkaProducer(
+        bootstrap_servers=args.broker,
+        value_serializer=lambda v: json.dumps(v).encode("utf-8")
+    )
+
+    print(f"Connected to Kafka broker at {args.broker}")
+
+    while True:
+        record = {
+            "sensor_id": random.randint(1, 10),
+            "temperature": round(random.uniform(20.0, 40.0), 2),
+            "humidity": round(random.uniform(30.0, 90.0), 2),
+            "timestamp": datetime.now().isoformat()
         }
-        producer.send(topic, value=msg)
-        print('Sent', i+1)
-        time.sleep(0.2)
-producer.flush()
-print('Producer finished.')
+        producer.send(args.topic, value=record)
+        print("Sent:", record)
+        time.sleep(2)
+
+if __name__ == "__main__":
+    main()
