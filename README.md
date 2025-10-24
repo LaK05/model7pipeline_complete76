@@ -1,9 +1,7 @@
-model7pipeline_complete
-=======================
+model7pipeline_complete76
 
 Objective
 ---------
-End-to-end project that implements the four assessment components:
 1. Data preprocessing using Apache Flink (or fallback to Spark/Pandas)
 2. Real-time streaming with Kafka + producer/consumer + ML inference
 3. Incremental model updates (partial_fit) using streaming data (CDC simulation)
@@ -21,8 +19,4 @@ Structure
 - requirements.txt         : Python dependencies
 - README.md
 
-Important
----------
-This project is prepared for Windows with Cygwin for Flink shell scripts. Some components (PyFlink, PySpark)
-require matching Python and Java versions. See docs/execution_steps.txt for detailed setup and troubleshooting.
 
